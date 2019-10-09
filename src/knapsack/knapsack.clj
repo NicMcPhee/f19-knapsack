@@ -83,7 +83,6 @@
 
 (defn select-parents
   [tournament-size popl]
-  (println (* 1.0 (apply max (map :quality popl))))
   (let [pop-size (count popl)]
     (repeatedly pop-size #(tournament-selection tournament-size popl))))
 
@@ -106,14 +105,19 @@
   {:generation (inc (:generation parent))
    :bits (mutate-bits mutation-rate (:bits parent))})
 
+(defn report
+  [popl]
+  (println "Generation: " (:generation (first popl))
+           "\tMax-quality: " (* 1.0 (apply max (map :quality popl)))))
+
 (defn next-generation
   [evaluator prob tournament-size popl]
-  (map (partial make-child (/ 1 (count (:items prob))))
-       (select-parents tournament-size
-                       (evaluate-population evaluator prob popl))))
+  (let [evaluated-pop (evaluate-population evaluator prob popl)]
+    (report evaluated-pop)
+    (map (partial make-child (/ 1 (count (:items prob))))
+         (select-parents tournament-size evaluated-pop))))
 
 ; (def prob (ks/make-random-problem 50 10 25 25))
 ; (def popl (ks/make-population 100 10))
-; (ks/evaluate-population ks/ramped-quality prob (nth (iterate (partial ks/next-generation ks/ramped-quality prob 2) popl) 100))
-; (nth (iterate (partial ks/next-generation prob 2) popl) 10)
+; (nth (iterate (partial ks/next-generation ks/ramped-quality prob 2) popl) 100)
 
