@@ -112,18 +112,20 @@
            "\t" (apply max (map (partial harsh-quality prob)
                                 popl))))
 
+(def *print-report* false)
+
 (defn next-generation
   [evaluator prob tournament-size popl]
   (let [evaluated-pop (evaluate-population evaluator prob popl)]
-    (report prob evaluated-pop)
+    (if *print-report*
+      (report prob evaluated-pop))
     (map (partial make-child (/ 1 (count (:items prob))))
          (select-parents tournament-size evaluated-pop))))
 
-(def *print-report* true)
-
 (defn do-run
   [prob quality-fn tournament-size pop-size num-generations]
-  (println "Generation\tMax-quality\tMax-legal-value")
+  (if *print-report*
+    (println "Generation\tMax-quality\tMax-legal-value"))
   (let [num-items (count (:items prob))
         initial-pop (make-population pop-size num-items)
         final-pop (nth (iterate
